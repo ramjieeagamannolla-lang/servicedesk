@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://servicedesk-aa7h.onrender.com')
+  .replace(/\/$/, '');
+
+const baseURL = API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL,
 });
 
 api.interceptors.request.use((config) => {
