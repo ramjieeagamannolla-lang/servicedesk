@@ -1,0 +1,171 @@
+// Each template drives one seeded ticket.
+// daysAgo: how many days before "now" the ticket was created (spreads the trend chart).
+// status: final status to leave the ticket in.
+// requesterEmail/assigneeEmail: resolved to user ids in seed.js.
+// breach: force the SLA into a BREACHED state even though it's resolved/open (for demo variety).
+const ticketTemplates = [
+  {
+    title: 'VPN disconnects every 10 minutes during client calls',
+    description: 'My VPN keeps dropping every 10 minutes while I am on client calls, forcing me to reconnect repeatedly.',
+    category: 'VPN', priority: 'CRITICAL', requesterEmail: 'employee@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'IN_PROGRESS', daysAgo: 0, hoursAgo: 2,
+  },
+  {
+    title: 'Cannot connect to office Wi-Fi on the 3rd floor',
+    description: 'Since this morning my laptop cannot connect to the corporate Wi-Fi on the 3rd floor, other floors seem fine.',
+    category: 'Network', priority: 'HIGH', requesterEmail: 'employee2@demo.com', assigneeEmail: 'tech2@demo.com',
+    status: 'ASSIGNED', daysAgo: 0, hoursAgo: 5,
+  },
+  {
+    title: 'Laptop is extremely slow after latest Windows update',
+    description: 'My laptop has been freezing and running very slowly since the Windows update installed last night.',
+    category: 'Hardware', priority: 'MEDIUM', requesterEmail: 'employee3@demo.com', assigneeEmail: 'tech3@demo.com',
+    status: 'NEW', daysAgo: 0, hoursAgo: 1,
+  },
+  {
+    title: 'Locked out of account after failed login attempts',
+    description: 'I entered my password wrong a few times and now my account says it is locked. I need access urgently.',
+    category: 'Access', priority: 'HIGH', requesterEmail: 'employee4@demo.com', assigneeEmail: null,
+    status: 'NEW', daysAgo: 0, hoursAgo: 3,
+  },
+  {
+    title: 'Printer on 2nd floor showing offline',
+    description: 'The HP printer near the finance desk on the 2nd floor shows as offline and nobody can print.',
+    category: 'Printer', priority: 'LOW', requesterEmail: 'employee3@demo.com', assigneeEmail: null,
+    status: 'TRIAGED', daysAgo: 1, hoursAgo: 4,
+  },
+  {
+    title: 'Need Adobe Creative Cloud installed on new laptop',
+    description: 'I received a new laptop and need Adobe Creative Cloud installed for design work.',
+    category: 'Software', priority: 'LOW', requesterEmail: 'employee2@demo.com', assigneeEmail: 'tech2@demo.com',
+    status: 'ASSIGNED', daysAgo: 1, hoursAgo: 8,
+  },
+  {
+    title: 'Received a suspicious email asking for password',
+    description: 'I got an email claiming to be from IT asking me to confirm my password on an external link. It looks like phishing.',
+    category: 'Security', priority: 'CRITICAL', requesterEmail: 'employee4@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'IN_PROGRESS', daysAgo: 1, hoursAgo: 6,
+  },
+  {
+    title: 'Outlook not syncing new emails',
+    description: 'Outlook has not synced any new emails since yesterday afternoon, even though webmail shows new messages.',
+    category: 'Email', priority: 'MEDIUM', requesterEmail: 'employee5@demo.com', assigneeEmail: 'tech3@demo.com',
+    status: 'WAITING_FOR_USER', daysAgo: 2, hoursAgo: 2,
+  },
+  {
+    title: 'External monitor not detected on docking station',
+    description: 'When I dock my laptop, the external monitor says "No Signal" even though the cable is connected.',
+    category: 'Hardware', priority: 'MEDIUM', requesterEmail: 'employee@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'RESOLVED', daysAgo: 3, hoursAgo: 1,
+    resolutionSummary: 'Updated display drivers and reseated the docking cable. Monitor now detected correctly.',
+  },
+  {
+    title: 'Need VPN client reinstalled after OS reinstall',
+    description: 'IT reimaged my laptop last week and the VPN client was not reinstalled. I cannot access internal systems.',
+    category: 'VPN', priority: 'HIGH', requesterEmail: 'employee5@demo.com', assigneeEmail: 'tech2@demo.com',
+    status: 'RESOLVED', daysAgo: 3, hoursAgo: 6,
+    resolutionSummary: 'Reinstalled the VPN client and verified successful connection with the employee.',
+  },
+  {
+    title: 'Password reset request for finance portal',
+    description: 'I forgot my password for the finance reporting portal and the self-service reset link is not working.',
+    category: 'Access', priority: 'MEDIUM', requesterEmail: 'employee3@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'CLOSED', daysAgo: 4, hoursAgo: 2,
+    resolutionSummary: 'Manually reset the password and verified login. Advised on password manager for future resets.',
+    confirmed: true,
+  },
+  {
+    title: 'New employee onboarding - laptop and accounts setup',
+    description: 'New hire starting Monday needs a laptop, email account, and VPN access configured.',
+    category: 'Access', priority: 'MEDIUM', requesterEmail: 'employee4@demo.com', assigneeEmail: 'tech3@demo.com',
+    status: 'CLOSED', daysAgo: 5, hoursAgo: 3,
+    resolutionSummary: 'Provisioned laptop, created accounts, and configured VPN access ahead of the start date.',
+    confirmed: true,
+  },
+  {
+    title: 'Wi-Fi outage across the entire 4th floor',
+    description: 'Nobody on the 4th floor can connect to Wi-Fi since about 9 AM. This is affecting the whole sales team.',
+    category: 'Network', priority: 'CRITICAL', requesterEmail: 'employee@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'RESOLVED', daysAgo: 2, hoursAgo: 4,
+    resolutionSummary: 'Identified a faulty access point and swapped it out. Connectivity restored across the floor.',
+    breach: true,
+  },
+  {
+    title: 'Critical: production VPN gateway unreachable',
+    description: 'Multiple engineers cannot reach the VPN gateway used to access production systems. This is blocking a deployment.',
+    category: 'VPN', priority: 'CRITICAL', requesterEmail: 'employee5@demo.com', assigneeEmail: 'tech2@demo.com',
+    status: 'IN_PROGRESS', daysAgo: 0, hoursAgo: 6,
+    breach: true,
+  },
+  {
+    title: 'Toner replacement needed on 4th floor printer',
+    description: 'The Canon printer on the 4th floor is printing very faint text, likely needs a new toner cartridge.',
+    category: 'Printer', priority: 'LOW', requesterEmail: 'employee2@demo.com', assigneeEmail: null,
+    status: 'NEW', daysAgo: 0, hoursAgo: 10,
+    breach: true,
+  },
+  {
+    title: 'Ticket reopened - VPN issue came back after fix',
+    description: 'The VPN was working after the previous fix but has started dropping again this morning.',
+    category: 'VPN', priority: 'HIGH', requesterEmail: 'employee@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'REOPENED', daysAgo: 1, hoursAgo: 1,
+    resolutionSummary: 'Restarted VPN client and refreshed credentials.',
+    reopened: true,
+  },
+  {
+    title: 'Request for a second monitor',
+    description: 'I would like to request a second monitor for my desk to improve productivity while working with multiple spreadsheets.',
+    category: 'Hardware', priority: 'LOW', requesterEmail: 'employee3@demo.com', assigneeEmail: null,
+    status: 'NEW', daysAgo: 1, hoursAgo: 2,
+  },
+  {
+    title: 'Mailbox full - cannot send or receive email',
+    description: 'I am getting a "mailbox full" error and cannot send or receive any emails since this morning.',
+    category: 'Email', priority: 'HIGH', requesterEmail: 'employee4@demo.com', assigneeEmail: 'tech3@demo.com',
+    status: 'RESOLVED', daysAgo: 2, hoursAgo: 8,
+    resolutionSummary: 'Archived old emails and increased mailbox quota. Confirmed employee can send/receive normally.',
+    confirmed: true,
+  },
+  {
+    title: 'Software license expired for design tool',
+    description: 'Adobe Creative Cloud is showing a license expired message and I cannot open any project files.',
+    category: 'Software', priority: 'MEDIUM', requesterEmail: 'employee2@demo.com', assigneeEmail: 'tech2@demo.com',
+    status: 'ASSIGNED', daysAgo: 0, hoursAgo: 3,
+  },
+  {
+    title: 'Suspicious pop-ups appearing on desktop',
+    description: 'My desktop has started showing frequent suspicious pop-up ads even when no browser is open. Worried about malware.',
+    category: 'Security', priority: 'HIGH', requesterEmail: 'employee5@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'IN_PROGRESS', daysAgo: 0, hoursAgo: 4,
+  },
+  {
+    title: 'Cannot access shared drive on the network',
+    description: 'I am unable to access the shared department drive, getting a permissions error since yesterday.',
+    category: 'Access', priority: 'MEDIUM', requesterEmail: 'employee3@demo.com', assigneeEmail: 'tech3@demo.com',
+    status: 'WAITING_FOR_USER', daysAgo: 1, hoursAgo: 5,
+  },
+  {
+    title: 'New laptop request for incoming intern',
+    description: 'We have an intern joining next week and need a laptop provisioned with standard software.',
+    category: 'Hardware', priority: 'LOW', requesterEmail: 'employee4@demo.com', assigneeEmail: 'tech2@demo.com',
+    status: 'CLOSED', daysAgo: 6, hoursAgo: 2,
+    resolutionSummary: 'Provisioned a spare laptop with the standard software image ahead of the start date.',
+    confirmed: true,
+  },
+  {
+    title: 'Client meeting VPN failure - urgent',
+    description: 'My VPN is not connecting and I have an important client meeting in 30 minutes.',
+    category: 'VPN', priority: 'CRITICAL', requesterEmail: 'employee@demo.com', assigneeEmail: 'technician@demo.com',
+    status: 'CLOSED', daysAgo: 7, hoursAgo: 1,
+    resolutionSummary: 'VPN client was restarted and credentials were refreshed. Connection restored.',
+    confirmed: true,
+  },
+  {
+    title: 'Network printer scan-to-email not working',
+    description: 'The scan-to-email feature on the shared printer stopped working, scans do not arrive in mailboxes.',
+    category: 'Printer', priority: 'LOW', requesterEmail: 'employee5@demo.com', assigneeEmail: null,
+    status: 'NEW', daysAgo: 0, hoursAgo: 7,
+  },
+];
+
+module.exports = { ticketTemplates };
