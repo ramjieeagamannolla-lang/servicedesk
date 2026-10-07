@@ -52,12 +52,25 @@ const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .map((s) => s.trim().replace(/\/$/, ''))
   .filter(Boolean);
 
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+
+  const normalizedOrigin = origin.replace(/\/$/, '');
+  if (allowedOrigins.includes(normalizedOrigin)) return true;
+
+  try {
+    const { protocol, hostname } = new URL(normalizedOrigin);
+    return protocol === 'https:' && hostname.endsWith('.vercel.app');
+  } catch {
+    return false;
+  }
+}
+
 app.use(
   cors({
     origin(origin, callback) {
       // Allow non-browser tools (curl, Postman, server-to-server) with no origin header.
-      const normalizedOrigin = origin?.replace(/\/$/, '');
-      if (!origin || allowedOrigins.includes(normalizedOrigin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
       return callback(new Error('Not allowed by CORS'));
